@@ -6,10 +6,11 @@ PARSER_BEGIN(gl)
 package jcc;
 import java.io.*;
 import pkg.*;
+import java.util.LinkedList;
 public class gl {
    static Tabela tabela = new Tabela();
    public static void main(String args[])  throws ParseException  {
-        gl analisador = null;
+      gl analisador = null;
       try {
          analisador = new gl(new FileInputStream("prog_fonte.my"));
          analisador.inicio();
@@ -65,39 +66,77 @@ void exibe() : {}
 {
       <EXIBE> <IDENT>
 }
-void atribui() : {Simbolo simb; Token t;} 
+void atribui() : {Simbolo simb; Token t; LinkedList<Item> listaExp;} 
 {
       t=<IDENT>
       {
             simb = new Simbolo(t.image);
             tabela.inclui(simb);
       }
-      <ATRIB> expressao()
+      <ATRIB> listaExp = expressao()
+      {
+            System.out.println(listaExp);
+      }
 }
-void expressao() : {} 
+LinkedList<Item> expressao() : {LinkedList<Item> listaExp = new LinkedList<Item>(); Item item = null;} 
 {
-      fator() ( <ADICAO> fator() )*
+      item = fator()
+      {
+            listaExp.add(item);
+      }
+      ( 
+         <ADICAO> item = fator()
+         {
+              listaExp.add(item);
+              listaExp.add(new Item('o',"+"));
+         }
+     
+      )*
+      {
+            return listaExp;
+      }
 }
-void fator() : {Token t;} 
+Item fator() : {Token t;Item item = null; int valorNumero;} 
 {
       t = <IDENT>
       {
-            if(!tabela.isExiste(t.image))
-                  System.out.println("Erro semântico \n A variável "+t.image+
-                                     "não foi inicializada");
+         if(!tabela.isExiste(t.image))
+          System.out.println("Erro semântico \n A variável "+t.image+
+                             " não foi inicializada");
+         item = new Item('v',t.image);
+         return item;
       }
   |
-      numero()
+      valorNumero = numero()
+      {
+         item = new Item('n',""+valorNumero);
+         return item;
+      }
 }
-void numero() : {} 
+int numero() : {int valorUnidade = 0, valorDezena = 0;} 
 {
-      dezena() ( unidade() )? | unidade()
+      (
+         valorDezena = dezena() ( valorUnidade = unidade() )? | valorUnidade = unidade()
+      )
+      {
+            return valorDezena + valorUnidade;
+      }
 }
-void unidade() : {} 
+int unidade() : {} 
 {
-      <UM> | <DOIS> | <TRES> | <QUATRO> | <CINCO> | <SEIS> | <SETE> | <OITO> | <NOVE>
+      <UM>     { return 1; } |
+      <DOIS>   { return 2; } |
+      <TRES>   { return 3; } |
+      <QUATRO> { return 4; } |
+      <CINCO>  { return 5; } |
+      <SEIS>   { return 6; } |
+      <SETE>   { return 7; } |
+      <OITO>   { return 8; } |
+      <NOVE>   { return 9; }
 }
-void dezena() : {} 
+int dezena() : {} 
 {
-      <DEZ> | <VINTE> | <TRINTA>
+      <DEZ>    { return 10; } |
+      <VINTE>  { return 20; } |
+      <TRINTA> { return 30; }
 }
