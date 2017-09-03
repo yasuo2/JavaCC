@@ -9,11 +9,11 @@ import pkg.*;
 public class gl {
    static Tabela tabela = new Tabela();
    public static void main(String args[])  throws ParseException  {
-      gl analisador = null;
+        gl analisador = null;
       try {
          analisador = new gl(new FileInputStream("prog_fonte.my"));
          analisador.inicio();
-         System.out.println(tabela.toString());
+         // System.out.println(tabela.toString());
       }
       catch(FileNotFoundException e) {
          System.out.println("Erro: arquivo não encontrado");
@@ -78,9 +78,16 @@ void expressao() : {}
 {
       fator() ( <ADICAO> fator() )*
 }
-void fator() : {} 
+void fator() : {Token t;} 
 {
-      <IDENT> | numero()
+      t = <IDENT>
+      {
+            if(!tabela.isExiste(t.image))
+                  System.out.println("Erro semântico \n A variável "+t.image+
+                                     "não foi inicializada");
+      }
+  |
+      numero()
 }
 void numero() : {} 
 {
