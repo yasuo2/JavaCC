@@ -5,12 +5,15 @@ options {
 PARSER_BEGIN(gl)
 package jcc;
 import java.io.*;
+import pkg.*;
 public class gl {
+   static Tabela tabela = new Tabela();
    public static void main(String args[])  throws ParseException  {
       gl analisador = null;
       try {
          analisador = new gl(new FileInputStream("prog_fonte.my"));
          analisador.inicio();
+         System.out.println(tabela.toString());
       }
       catch(FileNotFoundException e) {
          System.out.println("Erro: arquivo não encontrado");
@@ -24,9 +27,7 @@ public class gl {
    }
 }
 PARSER_END(gl)
- 
 SKIP : { " " | "\t" | "\r" | "\n" }
- 
 TOKEN [IGNORE_CASE] : {
       <EXIBE: "exibe" >
 }
@@ -47,7 +48,7 @@ TOKEN : {
       < DEZ:     "X" >          |
       < VINTE:   "XX" >         |
       < TRINTA:  "XXX" >      
-}               
+}
 void inicio() : {}
 {
    ( linhaComando() )* <EOF>
@@ -64,9 +65,14 @@ void exibe() : {}
 {
       <EXIBE> <IDENT>
 }
-void atribui() : {} 
+void atribui() : {Simbolo simb; Token t;} 
 {
-      <IDENT> <ATRIB> expressao()
+      t=<IDENT>
+      {
+            simb = new Simbolo(t.image);
+            tabela.inclui(simb);
+      }
+      <ATRIB> expressao()
 }
 void expressao() : {} 
 {
