@@ -1,0 +1,56 @@
+options {
+  DEBUG_PARSER = false;
+  DEBUG_TOKEN_MANAGER = false;
+}
+PARSER_BEGIN(gl)
+package jcc;
+import java.io.*;
+public class gl {
+   public static void main(String args[])  throws ParseException  {
+      gl analisador = null;
+      try {
+         analisador = new gl(new FileInputStream("prog_fonte.my"));
+         analisador.inicio();
+      }
+      catch(FileNotFoundException e) {
+         System.out.println("Erro: arquivo não encontrado");
+      }
+      catch(TokenMgrError e) {
+         System.out.println("Erro léxico\n" + e.getMessage());
+      }
+   }
+}
+PARSER_END(gl)
+ 
+SKIP : { " " | "\t" | "\r" | "\n" }
+ 
+TOKEN [IGNORE_CASE] : {
+      <EXIBE: "exibe" >
+}
+TOKEN : {
+      < IDENT:   (["a"-"z"])+ > |
+      < ATRIB:   ":=" >         |
+      < ADICAO:  "+" >          |
+      < PT_VIRG: ";" >          |
+      < UM:      "I" >          |
+      < DOIS:    "II" >         |
+      < TRES:    "III" >        |
+      < QUATRO:  "IV" >         |
+      < CINCO:   "V" >          |
+      < SEIS:    "VI" >         |
+      < SETE:    "VII" >        |
+      < OITO:    "VIII" >       |
+      < NOVE:    "IX" >         |
+      < DEZ:     "X" >          |
+      < VINTE:   "XX" >         |
+      < TRINTA:  "XXX" >      
+}               
+JAVACODE void inicio()
+{
+   Token t;
+   do {
+      t = getNextToken();
+      System.out.println(tokenImage[t.kind]+"\t"+t.image);
+   }
+   while(t.kind != EOF);
+}
