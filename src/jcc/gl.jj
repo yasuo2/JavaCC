@@ -8,15 +8,16 @@ import java.io.*;
 import pkg.*;
 import java.util.LinkedList;
 public class gl {
-   static Tabela tabela = new Tabela();
+   public static Tabela tabela = new Tabela();
    static LinkedList<Comando> listaComandos;
    public static void main(String args[])  throws ParseException  {
-      gl analisador = null;
+        gl analisador = null;
       try {
          analisador = new gl(new FileInputStream("prog_fonte.my"));
          listaComandos = analisador.inicio();
          // System.out.println(tabela.toString());
-         System.out.println(listaComandos);
+         // System.out.println(listaComandos);
+         GeradorCodigoDestino.geraCodigoAssembler(listaComandos);
       }
       catch(FileNotFoundException e) {
          System.out.println("Erro: arquivo não encontrado");
@@ -30,7 +31,9 @@ public class gl {
    }
 }
 PARSER_END(gl)
+ 
 SKIP : { " " | "\t" | "\r" | "\n" }
+ 
 TOKEN [IGNORE_CASE] : {
       <EXIBE: "exibe" >
 }
