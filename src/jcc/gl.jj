@@ -9,12 +9,14 @@ import pkg.*;
 import java.util.LinkedList;
 public class gl {
    static Tabela tabela = new Tabela();
+   static LinkedList<Comando> listaComandos;
    public static void main(String args[])  throws ParseException  {
       gl analisador = null;
       try {
          analisador = new gl(new FileInputStream("prog_fonte.my"));
-         analisador.inicio();
+         listaComandos = analisador.inicio();
          // System.out.println(tabela.toString());
+         System.out.println(listaComandos);
       }
       catch(FileNotFoundException e) {
          System.out.println("Erro: arquivo não encontrado");
@@ -50,23 +52,44 @@ TOKEN : {
       < VINTE:   "XX" >         |
       < TRINTA:  "XXX" >      
 }
-void inicio() : {}
+LinkedList<Comando> inicio() : {Comando com = null; LinkedList<Comando> listaComandos = new LinkedList();}
 {
-   ( linhaComando() )* <EOF>
+   ( com = linhaComando()
+      {
+           listaComandos.add(com);
+      }
+   )* <EOF>
+   {
+      return listaComandos;
+   }
 }
-void linhaComando() : {} 
+Comando linhaComando() : {Comando com;} 
 {
-      comando() <PT_VIRG>
+      com = comando() <PT_VIRG>
+      {
+            return com;
+      }
 }
-void comando() : {} 
+Comando comando() : {Comando com;} 
 {
-      exibe() | atribui()
+      (
+          com = exibe()
+       |
+          com = atribui()
+      )
+      {
+            return com;
+      }
 }
-void exibe() : {}
+Comando exibe() : {Comando com; Token t;}
 {
-      <EXIBE> <IDENT>
+      <EXIBE> t = <IDENT>
+      {
+            com = new Comando('E',t.image,"");
+            return com;
+      }
 }
-void atribui() : {Simbolo simb; Token t; LinkedList<Item> listaExp;} 
+Comando atribui() : {Simbolo simb; Token t; LinkedList<Item> listaExp; Comando com;} 
 {
       t=<IDENT>
       {
@@ -75,7 +98,9 @@ void atribui() : {Simbolo simb; Token t; LinkedList<Item> listaExp;}
       }
       <ATRIB> listaExp = expressao()
       {
-            System.out.println(listaExp);
+            //System.out.println(listaExp);
+            com = new Comando('A',t.image,listaExp);
+            return com;
       }
 }
 LinkedList<Item> expressao() : {LinkedList<Item> listaExp = new LinkedList<Item>(); Item item = null;} 
